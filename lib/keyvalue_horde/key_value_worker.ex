@@ -1,6 +1,13 @@
 defmodule KeyValue.Worker do
   use GenServer
 
+  def child_spec(name) do
+    %{
+      id: "#{__MODULE__}_#{name}",
+      start: {__MODULE__, :start_link, [name]}
+    }
+  end
+
   def start_link(name) do
     IO.puts("Starting KV-#{name}")
     GenServer.start_link(__MODULE__, [], name: via_tuple(name))
@@ -15,14 +22,14 @@ defmodule KeyValue.Worker do
   end
 
   def whereis(name) do
-    case Horde.Registry.lookup(KeyValue.Registry, name) do
-      {pid, _} -> pid
+    case Horde.Registry.lookup(KeyValue.Registry, {__MODULE__, name}) do
+      [{pid, _}] -> pid
       _ -> nil
     end
   end
 
   def via_tuple(name) do
-    {:via, Horde.Registry, {KeyValue.Registry, name}}
+    {:via, Horde.Registry, {KeyValue.Registry, {__MODULE__, name}}}
   end
 
   @impl GenServer
@@ -38,21 +45,5 @@ defmodule KeyValue.Worker do
   @impl GenServer
   def handle_call({:get, key}, _, store) do
     {:reply, Map.get(store, key), store}
-  end
-
-  def handle_cast({:swarm, :end_handoff, previous_state}, _state) do
-    {:noreply, previous_state}
-  end
-
-  def handle_cast({:swarm, :resolve_conflict, other_state}, _state) do
-    {:noreply, other_state}
-  end
-
-  def handle_call({:swarm, :begin_handoff}, _from, state) do
-    {:reply, {:resume, state}, state}
-  end
-
-  def handle_info({:swarm, :die}, state) do
-    {:stop, :shutdown, state}
   end
 end

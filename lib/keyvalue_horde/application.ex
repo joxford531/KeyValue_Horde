@@ -14,7 +14,7 @@ defmodule KeyValue.Application do
       },
       {Horde.Registry, [name: KeyValue.Registry, keys: :unique]},
       {Horde.Supervisor, [name: KeyValue.HordeSupervisor, strategy: :one_for_one]},
-      KeyValue.Cache
+      {KeyValue.Connector, []}
     ]
     opts = [strategy: :one_for_one, name: KeyValue.Supervisor]
     Supervisor.start_link(children, opts)
