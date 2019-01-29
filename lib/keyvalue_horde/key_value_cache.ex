@@ -3,17 +3,17 @@ defmodule KeyValue.Cache do
     existing_process(name) || new_process(name)
   end
 
-  # def local_swarm_processes() do
-  #   Swarm.registered
-  #   |> Enum.filter(fn {_, pid} -> node(pid) == node() end)
-  # end
+  def local_worker_processes() do
+    Horde.Supervisor.which_children(KeyValue.HordeSupervisor)
+    |> Enum.filter(fn {_name, pid, _, _} -> node(pid) == node() end)
+  end
 
-  # def local_swarm_count() do
-  #   Swarm.registered
-  #   |> Stream.map(fn {_, pid} -> pid end)
-  #   |> Stream.filter(fn pid -> node(pid) == node() end)
-  #   |> Enum.count()
-  # end
+  def local_worker_count() do
+    Horde.Supervisor.which_children(KeyValue.HordeSupervisor)
+    |> Stream.map(fn {_name, pid, _, _} -> pid end)
+    |> Stream.filter(fn pid -> node(pid) == node() end)
+    |> Enum.count()
+  end
 
   defp existing_process(name) do
     KeyValue.Worker.whereis(name)
