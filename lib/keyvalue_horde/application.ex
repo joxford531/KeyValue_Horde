@@ -18,6 +18,7 @@ defmodule KeyValue.Application do
     ]
     opts = [strategy: :one_for_one, name: KeyValue.Supervisor]
     Supervisor.start_link(children, opts)
+    KeyValue.Handoff.register()
   end
 
   def create_maps() do
