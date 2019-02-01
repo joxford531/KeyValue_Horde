@@ -13,11 +13,23 @@ defmodule KeyValue.Handoff do
     {:ok, []}
   end
 
+  def create_update_map(map_name, map) do
+    DeltaCrdt.mutate(get_self(), :add, [map_name, map])
+  end
+
   def get_self() do
     case Horde.Registry.lookup(KeyValue.Registry, "#{Node.self()}_crdt") do
       [{_, pid}] -> pid
       _ -> nil
     end
+  end
+
+  def read_map(map_name) do
+    DeltaCrdt.read(get_self()) |> Map.get(map_name)
+  end
+
+  def remove_map(map_name) do
+    DeltaCrdt.mutate(get_self(), :remove, [map_name])
   end
 
   def whereis(node_name) do

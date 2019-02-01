@@ -23,7 +23,8 @@ defmodule KeyValue.MixProject do
   defp deps do
     [
       {:libcluster, "~> 3.0"},
-      {:horde, "~> 0.4.0-rc.2"}
+      {:horde, "~> 0.4.0-rc.2"},
+      {:delta_crdt, "~> 0.3.1"}
     ]
   end
 end

@@ -10,7 +10,7 @@ defmodule KeyValue.Worker do
 
   def start_link(name) do
     IO.puts("Starting KV-#{name}")
-    GenServer.start_link(__MODULE__, [], name: via_tuple(name))
+    GenServer.start_link(__MODULE__, name, name: via_tuple(name))
   end
 
   def put(name, key, value) do
@@ -32,18 +32,29 @@ defmodule KeyValue.Worker do
     {:via, Horde.Registry, {KeyValue.Registry, {__MODULE__, name}}}
   end
 
-  @impl GenServer
-  def init(_) do
-    {:ok, %{}}
+  defp get_cached_map(name) do
+    KeyValue.Handoff.read_map(name)
   end
 
   @impl GenServer
-  def handle_cast({:put, key, value}, store) do
-    {:noreply, Map.put(store, key, value)}
+  def init(name) do
+    case get_cached_map(name) do
+      nil ->
+        KeyValue.Handoff.create_update_map(name, %{})
+        {:ok, {name, %{}}}
+      map -> {:ok, {name, map}}
+    end
   end
 
   @impl GenServer
-  def handle_call({:get, key}, _, store) do
-    {:reply, Map.get(store, key), store}
+  def handle_cast({:put, key, value}, {name, map}) do
+    updated_map = Map.put(map, key, value)
+    KeyValue.Handoff.create_update_map(name, updated_map)
+    {:noreply, {name, updated_map}}
+  end
+
+  @impl GenServer
+  def handle_call({:get, key}, _, {name, map}) do
+    {:reply, Map.get(map, key), {name, map}}
   end
 end
