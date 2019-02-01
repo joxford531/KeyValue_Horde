@@ -8,7 +8,6 @@ defmodule KeyValue.Connector do
   def run do
     connect_supervisor()
     connect_registry()
-    # Horde.Supervisor.start_child(KeyValue.HordeSupervisor, KeyValue.Cache)
   end
 
   defp connect_supervisor do
