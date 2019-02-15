@@ -22,12 +22,12 @@ defmodule KeyValue.Application do
   end
 
   def create_maps() do
-    1..50
+    1..2_500
     |> Enum.each(fn num -> KeyValue.Cache.server_process("map #{num}") end)
   end
 
   def put_maps() do
-    1..50
+    1..2_500
     |> Enum.each(fn num -> KeyValue.Worker.put("map #{num}", "#{num} item", :rand.uniform(1_000_000)) end)
   end
 end

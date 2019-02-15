@@ -5,12 +5,12 @@ defmodule KeyValue.Cache do
 
   def local_worker_processes() do
     Horde.Supervisor.which_children(KeyValue.HordeSupervisor)
-    |> Enum.filter(fn {_name, pid, _, _} -> node(pid) == node() end)
+    |> Enum.filter(fn [{_name, pid, _, _}] -> node(pid) == node() end)
   end
 
   def local_worker_count() do
     Horde.Supervisor.which_children(KeyValue.HordeSupervisor)
-    |> Stream.map(fn {_name, pid, _, _} -> pid end)
+    |> Stream.map(fn [{_name, pid, _, _}] -> pid end)
     |> Stream.filter(fn pid -> node(pid) == node() end)
     |> Enum.count()
   end
